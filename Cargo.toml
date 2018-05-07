@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Robert Blankenship <rablanken13@gmail.com>"]
 
 [dependencies]
+piston_window = "0.70.0"
 
 [[bin]]
 name = "double-tetris"
