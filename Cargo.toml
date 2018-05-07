@@ -1,0 +1,10 @@
+[package]
+name = "double-tetris"
+version = "0.1.0"
+authors = ["Robert Blankenship <rablanken13@gmail.com>"]
+
+[dependencies]
+
+[[bin]]
+name = "double-tetris"
+path = "main.rs"
