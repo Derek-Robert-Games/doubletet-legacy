@@ -9,7 +9,7 @@ const WINDOW_HEIGHT: u32 = 480;
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_DIMENSIONS: [u32; 2] = [WINDOW_WIDTH, WINDOW_HEIGHT];
 
-fn main() {
+fn main() { 
     let mut window: PistonWindow = {
         WindowSettings::new("First Window", WINDOW_DIMENSIONS)
             .exit_on_esc(true) // Hitting escape exits the game.
@@ -24,11 +24,10 @@ fn main() {
                 [1.0, 0.0, 0.0, 1.0],
                 [0.0, 0.0, 100.0, 100.0],
                 context.transform,
-                graphics
+                graphics,
             )
         });
     }
 
     println!("Hello World!")
 }
-
