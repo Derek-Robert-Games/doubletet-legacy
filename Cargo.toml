@@ -8,4 +8,4 @@ piston_window = "0.70.0"
 
 [[bin]]
 name = "double-tetris"
-path = "main.rs"
+path = "src/main.rs"
