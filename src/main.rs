@@ -38,12 +38,11 @@ fn demo() {
         time_before = Instant::now();
         slide_rect_down(&mut rect, elapsed_time);
 
-        if let Some(Button::Keyboard(Key::Right)) = event.press_args() {
-            move_rect_right(&mut rect);
-        }
-
-        if let Some(Button::Keyboard(Key::Left)) = event.press_args() {
-            move_rect_left(&mut rect);
+        // pattern matching on user input
+        match event.press_args() {
+            Some(Button::Keyboard(Key::Right)) => move_rect_right(&mut rect),
+            Some(Button::Keyboard(Key::Left)) => move_rect_left(&mut rect),
+            _ => {},
         }
         
         //update the graphics window
