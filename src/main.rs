@@ -1,8 +1,14 @@
 extern crate piston_window;
 
+extern crate specs;
+#[macro_use]
+extern crate specs_derive;
+
 use piston_window::*;
 use std::time::Instant;
 use std::time::Duration;
+
+use specs::{Builder, World, DenseVecStorage, System, ReadStorage, Join, RunNow};
 
 const WINDOW_HEIGHT: u32 = 800;
 const WINDOW_WIDTH: u32 = 640;
@@ -11,8 +17,54 @@ const WINDOW_DIMENSIONS: [u32; 2] = [WINDOW_WIDTH, WINDOW_HEIGHT];
 const RECT_WIDTH: f64 = 100.0;
 const RECT_HEIGHT: f64 = 100.0;
 
+// components
+
+#[derive(Component, Debug)] // "Component" is from specs: automates the implementation of a component's storage
+struct Position {
+    x: f32,
+    y: f32,
+}
+
+#[derive(Component, Debug)]
+struct Dimensions {
+    width: f64, 
+    height: f64,
+} 
+
+// systems
+
+struct Slider;
+
+impl<'a> System<'a> for Slider {
+    type SystemData = (ReadStorage<'a, Position>,
+                       ReadStorage<'a, Dimensions>);
+
+    fn run(&mut self, (pos, dim): Self::SystemData) {
+        for (pos, dim) in (&pos, &dim).join() {
+            println!("Hello, {:?}", &dim);
+            println!("Hello, {:?}", &pos);
+        }
+    }
+}
+
+
 fn main() {
-    demo();
+    let mut world = init_world();
+    let mut slider_sys = Slider;
+    slider_sys.run_now(&world.res);
+    
+    //demo();
+}
+
+fn init_world() -> World {
+    let mut world = World::new();
+    world.register::<Position>();
+    world.register::<Dimensions>();
+    let rect = world.create_entity()
+                .with(Position{ x: 0.0, y: 0.0})
+                .with(Dimensions{ width: RECT_WIDTH, height: RECT_HEIGHT})
+                .build();
+    world
 }
 
 fn demo() {
