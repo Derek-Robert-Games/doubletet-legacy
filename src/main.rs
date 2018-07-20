@@ -12,7 +12,7 @@ use std::time::Instant;
 const WINDOW_HEIGHT: u32 = 800;
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_DIMENSIONS: [u32; 2] = [WINDOW_WIDTH, WINDOW_HEIGHT];
-const RECT_WIDTH: f64 = (WINDOW_WIDTH as f64) / 8.0;
+const BLOCK_WIDTH: f64 = (WINDOW_WIDTH as f64) / 8.0;
 const RECT_HEIGHT: f64 = (WINDOW_HEIGHT as f64) / 10.0;
 const NANOS_PER_SECOND: f64 = 1000000000.0;
 const MAX_MOVE_SPEED: f64 = 0.05;
@@ -61,13 +61,16 @@ struct KeysPressed {
     left: bool,
     right: bool,
     space: bool,
+    escape: bool,
 }
 
 struct Actions {
     move_left: bool,
     move_right: bool,
-    create_rect: bool,
+    spawn_block: bool,
 }
+
+struct KillProgram(bool);
 
 /****** Systems ******/
 
@@ -89,7 +92,7 @@ impl<'a> System<'a> for Dropper {
         for (active, pos, drop_speed) in (&mut active, &mut pos, &drop_speed).join() {
             // Only drop the active block.
             if active.0 {
-                // drop rects down
+                // drop blocks down
                 let y_delta = time_since_drop.subsec_nanos() as f64 * drop_speed.0 / NANOS_PER_SECOND;
                 pos.y = (pos.y + y_delta) % (WINDOW_HEIGHT as f64);
 
@@ -102,7 +105,7 @@ impl<'a> System<'a> for Dropper {
                     // Block has hit bottom of screen.
                     pos.y = y_max; 
                     active.0 = false; 
-                    actions.create_rect = true;
+                    actions.spawn_block = true;
                 } 
                 clock.last_drop = Instant::now();
             }
@@ -133,8 +136,8 @@ impl<'a> System<'a> for Movement {
                 let window_width: f64 = WINDOW_WIDTH.into();
                 if actions.move_right {
                     if secs_since_move > MAX_MOVE_SPEED {
-                        pos.x = pos.x + RECT_WIDTH;
-                        if pos.x > (window_width - RECT_WIDTH) {
+                        pos.x = pos.x + BLOCK_WIDTH;
+                        if pos.x > (window_width - BLOCK_WIDTH) {
                             pos.x = 0.0;
                         }
                         clock.last_player_move = Instant::now();
@@ -144,7 +147,7 @@ impl<'a> System<'a> for Movement {
                     if secs_since_move > MAX_MOVE_SPEED {
                         pos.x = pos.x - RECT_HEIGHT;
                         if pos.x < 0.0 {
-                            pos.x = window_width - RECT_WIDTH
+                            pos.x = window_width - BLOCK_WIDTH
                         }
                         clock.last_player_move = Instant::now();
                     }
@@ -156,9 +159,9 @@ impl<'a> System<'a> for Movement {
     }
 }
 
-struct RectSpawner;
+struct BlockSpawner;
 
-impl<'a> System<'a> for RectSpawner {
+impl<'a> System<'a> for BlockSpawner {
     type SystemData = (
         Entities<'a>,
         WriteExpect<'a, Clock>,
@@ -174,18 +177,18 @@ impl<'a> System<'a> for RectSpawner {
             time_since_spawn.as_secs() as f64 + time_since_spawn.subsec_nanos() as f64 * 1e-9;
 
         if secs_since_spawn > MAX_SPAWN_SPEED {
-            if actions.create_rect {
-                let new_rect = entities.create();
+            if actions.spawn_block {
+                let new_block = entities.create();
                 updater.insert(
-                    new_rect,
+                    new_block,
                     Dimensions {
-                        width: RECT_WIDTH,
+                        width: BLOCK_WIDTH,
                         height: RECT_HEIGHT,
                     },
                 );
-                updater.insert(new_rect, Position { x: 0.0, y: 0.0 });
+                updater.insert(new_block, Position { x: 0.0, y: 0.0 });
                 updater.insert(
-                    new_rect,
+                    new_block,
                     Color {
                         r: 1.0,
                         g: 0.0,
@@ -193,11 +196,11 @@ impl<'a> System<'a> for RectSpawner {
                         a: 1.0,
                     },
                 );
-                updater.insert(new_rect, DropSpeed(100.0));
-                updater.insert(new_rect, Active(true));
+                updater.insert(new_block, DropSpeed(100.0));
+                updater.insert(new_block, Active(true));
 
                 clock.last_spawn = Instant::now();
-                actions.create_rect = false;
+                actions.spawn_block = false;
             }
         }
     }
@@ -261,7 +264,10 @@ impl<'a> System<'a> for Render {
                 }
                 Some(Button::Keyboard(Key::Space)) => {
                     keys.space = true;
-                    actions.create_rect = true;
+                    actions.spawn_block = true;
+                }
+                Some(Button::Keyboard(Key::Escape)) => {
+                    keys.escape = true;
                 }
                 _ => {}
             }
@@ -270,6 +276,7 @@ impl<'a> System<'a> for Render {
                 Some(Button::Keyboard(Key::Right)) => keys.right = false,
                 Some(Button::Keyboard(Key::Left)) => keys.left = false,
                 Some(Button::Keyboard(Key::Space)) => keys.space = false,
+                Some(Button::Keyboard(Key::Escape)) => keys.escape = false,
                 _ => {}
             }
 
@@ -288,6 +295,21 @@ impl<'a> System<'a> for Render {
     }
 }
 
+struct Ender;
+
+impl<'a> System<'a> for Ender {
+    type SystemData = (ReadExpect<'a, KeysPressed>,
+                        WriteExpect<'a, KillProgram>);
+
+    fn run(&mut self, data: Self::SystemData) {
+        let (keys, mut kill) = data;
+        if keys.escape {
+            kill.0 = true;
+        }
+    }
+}
+
+
 /****** Main ******/
 
 fn main() {
@@ -302,13 +324,13 @@ fn ecs_demo() {
         .with(Dropper, "dropper", &[])
         //.with(Printer, "Printer", &[]) // for debugging
         .with(Timer, "timer", &[])
-        .with(RectSpawner, "spawner", &[]) 
+        .with(BlockSpawner, "spawner", &[]) 
         .with(Movement, "movement", &[])
         .with_thread_local(Render{window})
+        .with_thread_local(Ender)
         .build();
 
-    loop {
-        // warning, esc will not close program, need to ctrl-c in CLI
+    while !world.read_resource::<KillProgram>().0 { 
         dispatcher.dispatch(&mut world.res);
         world.maintain();
     }
@@ -326,11 +348,12 @@ fn init_world() -> World {
         left: false,
         right: false,
         space: false,
+        escape: false,
     });
     world.add_resource(Actions {
         move_left: false,
         move_right: false,
-        create_rect: false,
+        spawn_block: false,
     });
     world.add_resource(Clock {
         start: Instant::now(),
@@ -338,12 +361,13 @@ fn init_world() -> World {
         last_drop: Instant::now(),
         last_spawn: Instant::now(),
     });
+    world.add_resource(KillProgram(false));
 
     world
         .create_entity()
         .with(Position { x: 0.0, y: 0.0 })
         .with(Dimensions {
-            width: RECT_WIDTH,
+            width: BLOCK_WIDTH,
             height: RECT_HEIGHT,
         })
         .with(Color {
