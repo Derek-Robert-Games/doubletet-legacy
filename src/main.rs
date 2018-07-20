@@ -43,7 +43,15 @@ struct Color {
 #[derive(Component, Debug)]
 struct DropSpeed(f64);
 
+
+#[derive(Component, Debug)]
+struct Block {
+    // Could be a good place to put a lot of block properties (like position, etc.)
+    is_active: bool
+}
+
 /****** Resources ******/
+// These tend to be globals
 
 struct Clock {
     start: Instant,
@@ -70,20 +78,40 @@ struct Dropper;
 
 impl<'a> System<'a> for Dropper {
     type SystemData = (
+        WriteStorage<'a, Block>,
         WriteStorage<'a, Position>,
         WriteExpect<'a, Clock>,
         ReadStorage<'a, DropSpeed>,
+        WriteExpect<'a, PlayerActions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut pos, mut clock, drop_speed) = data;
+        let (mut block, mut pos, mut clock, drop_speed, mut player_actions) = data;
 
         let time_since_drop = clock.last_drop.elapsed();
 
-        for (pos, drop_speed) in (&mut pos, &drop_speed).join() {
+        for (block, pos, drop_speed) in (&mut block, &mut pos, &drop_speed).join() {
+            // Only drop the active block.
+            if !block.is_active {
+                continue;
+            }
+
             // drop rects down
             let y_delta = time_since_drop.subsec_nanos() as f64 * drop_speed.0 / NANOS_PER_SECOND;
-            pos.y = (pos.y + y_delta) % (WINDOW_HEIGHT as f64);
+            let y_new = (pos.y + y_delta) % (WINDOW_HEIGHT as f64);
+
+            // Not sure why we would multiply RECT_HEIGHT by 3.0/2.0... but it works... :)
+            let y_max = (WINDOW_HEIGHT as f64) - (RECT_HEIGHT * (3.0/2.0 as f64));
+
+            if y_new >= y_max {
+                // Block has hit bottom of screen.
+                pos.y = y_max;
+                block.is_active = false;
+                player_actions.create_rect = true;
+            } else {
+                pos.y = y_new
+            }
+
             clock.last_drop = Instant::now();
         }
     }
@@ -93,19 +121,25 @@ struct Movement;
 
 impl<'a> System<'a> for Movement {
     type SystemData = (
+        WriteStorage<'a, Block>,
         WriteStorage<'a, Position>,
         WriteExpect<'a, Clock>,
         WriteExpect<'a, PlayerActions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut pos, mut clock, mut actions) = data;
+        let (mut block, mut pos, mut clock, mut actions) = data;
 
         let time_since_move = clock.last_player_move.elapsed();
         let secs_since_move =
             time_since_move.as_secs() as f64 + time_since_move.subsec_nanos() as f64 * 1e-9;
 
-        for pos in (&mut pos).join() {
+        for (block, pos) in (&mut block, &mut pos).join() {
+            // Only move the active block
+            if !block.is_active {
+                continue;
+            }
+
             let window_width: f64 = WINDOW_WIDTH.into();
             if actions.move_right {
                 if secs_since_move > MAX_MOVE_SPEED {
@@ -169,6 +203,7 @@ impl<'a> System<'a> for RectSpawner {
                     },
                 );
                 updater.insert(new_rect, DropSpeed(100.0));
+                updater.insert(new_rect, Block {is_active: true});
                 clock.last_spawn = Instant::now();
                 actions.create_rect = false;
             }
@@ -293,6 +328,7 @@ fn init_world() -> World {
     world.register::<Dimensions>();
     world.register::<Color>();
     world.register::<DropSpeed>();
+    world.register::<Block>();
 
     world.add_resource(KeysPressed {
         left: false,
@@ -325,6 +361,7 @@ fn init_world() -> World {
             a: 1.0,
         })
         .with(DropSpeed(100.0))
+        .with(Block {is_active: true})
         .build();
 
     world
