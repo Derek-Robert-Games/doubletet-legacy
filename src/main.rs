@@ -326,11 +326,11 @@ fn ecs_demo() {
         .with(Timer, "timer", &[])
         .with(BlockSpawner, "spawner", &[]) 
         .with(Movement, "movement", &[])
+        .with(Ender, "ender", &[])
         .with_thread_local(Render{window})
-        .with_thread_local(Ender)
         .build();
 
-    while !world.read_resource::<KillProgram>().0 { 
+    while !world.read_resource::<KillProgram>().0 { //press esc while playing to end the loop
         dispatcher.dispatch(&mut world.res);
         world.maintain();
     }
