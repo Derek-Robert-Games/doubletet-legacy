@@ -12,7 +12,7 @@ use std::time::Instant;
 const WINDOW_HEIGHT: u32 = 800;
 const WINDOW_WIDTH: u32 = 640;
 const WINDOW_DIMENSIONS: [u32; 2] = [WINDOW_WIDTH, WINDOW_HEIGHT];
-const BLOCK_WIDTH: f64 = (WINDOW_WIDTH as f64) / 8.0;
+const RECT_WIDTH: f64 = (WINDOW_WIDTH as f64) / 8.0;
 const RECT_HEIGHT: f64 = (WINDOW_HEIGHT as f64) / 10.0;
 const NANOS_PER_SECOND: f64 = 1000000000.0;
 const MAX_MOVE_SPEED: f64 = 0.05;
@@ -136,8 +136,8 @@ impl<'a> System<'a> for Movement {
                 let window_width: f64 = WINDOW_WIDTH.into();
                 if actions.move_right {
                     if secs_since_move > MAX_MOVE_SPEED {
-                        pos.x = pos.x + BLOCK_WIDTH;
-                        if pos.x > (window_width - BLOCK_WIDTH) {
+                        pos.x = pos.x + RECT_WIDTH;
+                        if pos.x > (window_width - RECT_WIDTH) {
                             pos.x = 0.0;
                         }
                         clock.last_player_move = Instant::now();
@@ -147,7 +147,7 @@ impl<'a> System<'a> for Movement {
                     if secs_since_move > MAX_MOVE_SPEED {
                         pos.x = pos.x - RECT_HEIGHT;
                         if pos.x < 0.0 {
-                            pos.x = window_width - BLOCK_WIDTH
+                            pos.x = window_width - RECT_WIDTH
                         }
                         clock.last_player_move = Instant::now();
                     }
@@ -182,7 +182,7 @@ impl<'a> System<'a> for BlockSpawner {
                 updater.insert(
                     new_block,
                     Dimensions {
-                        width: BLOCK_WIDTH,
+                        width: RECT_WIDTH,
                         height: RECT_HEIGHT,
                     },
                 );
@@ -367,7 +367,7 @@ fn init_world() -> World {
         .create_entity()
         .with(Position { x: 0.0, y: 0.0 })
         .with(Dimensions {
-            width: BLOCK_WIDTH,
+            width: RECT_WIDTH,
             height: RECT_HEIGHT,
         })
         .with(Color {
