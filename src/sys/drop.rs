@@ -65,7 +65,7 @@ fn map_check(active: bool, x: u32, y: f64, mut map: HashMap<u32, f64>) -> HashMa
             }
         }
     }
-    return map;
+    map
 }
 
 
