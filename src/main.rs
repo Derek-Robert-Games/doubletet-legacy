@@ -6,11 +6,14 @@ extern crate specs_derive;
 use piston_window::*;
 use specs::prelude::*;
 use std::time::Instant;
+use std::collections::HashMap;
 
 /****** Constants ******/
 
-const WINDOW_HEIGHT: u32 = 800;
-const WINDOW_WIDTH: u32 = 640;
+// R: 800 by 640 seems to not quite fit on my laptop screen.
+// Since window resize does not scale the map, blocks will be chopped off at the bottom of my screen.
+const WINDOW_HEIGHT: u32 = 625;
+const WINDOW_WIDTH: u32 = 500;
 const WINDOW_DIMENSIONS: [u32; 2] = [WINDOW_WIDTH, WINDOW_HEIGHT];
 const RECT_WIDTH: f64 = (WINDOW_WIDTH as f64) / 8.0;
 const RECT_HEIGHT: f64 = (WINDOW_HEIGHT as f64) / 10.0;
@@ -86,20 +89,41 @@ impl<'a> System<'a> for Dropper {
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut active, mut pos, mut clock, drop_speed, mut actions) = data;
+        let (mut active, mut positions, mut clock, drop_speed, mut actions) = data;
         let time_since_drop = clock.last_drop.elapsed();
 
-        for (active, pos, drop_speed) in (&mut active, &mut pos, &drop_speed).join() {
+        // Build the max_y_by_x for each value.
+        // Would like to separate this into another function or library for testability, but can't
+        // figure out the function signature /shrug
+        // In any case, we have a hashmap, bucketed by the x value, with the highest y value.
+        let mut max_y_by_x = HashMap::<u32, f64>::new();
+        for (active, pos) in (&active, &positions).join() {
+            if !active.0 {
+                let pos_x = &(pos.x as u32);
+                match max_y_by_x.get(pos_x) {
+                    Some(&pos_y) => {
+                        if (pos.y - RECT_HEIGHT) < pos_y {
+                            max_y_by_x.insert(*pos_x, pos.y - RECT_HEIGHT);
+                        }
+                    }
+                    None => {
+                        max_y_by_x.insert(*pos_x, pos.y - RECT_HEIGHT);
+                    }
+                }
+            }
+        }
+
+        for (active, pos, drop_speed) in (&mut active, &mut positions, &drop_speed).join() {
             // Only drop the active block.
             if active.0 {
                 // drop blocks down
                 let y_delta = time_since_drop.subsec_nanos() as f64 * drop_speed.0 / NANOS_PER_SECOND;
                 pos.y = (pos.y + y_delta) % (WINDOW_HEIGHT as f64);
 
-                // Not sure why we would multiply RECT_HEIGHT by 3.0/2.0... but it works... :)
-                // why does this happen?
-                // somehow I fixed it by making seemingly unrelated changes... weird. 
-                let y_max = (WINDOW_HEIGHT as f64) - (RECT_HEIGHT);
+                let y_max = match max_y_by_x.get(&(pos.x as u32)) {
+                    Some(&pos_y) => pos_y,
+                    None         => (WINDOW_HEIGHT as f64) - (RECT_HEIGHT)
+                };
 
                 if pos.y >= y_max {
                     // Block has hit bottom of screen.
