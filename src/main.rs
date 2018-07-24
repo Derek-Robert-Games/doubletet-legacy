@@ -5,11 +5,14 @@ extern crate specs_derive;
 
 mod sys;
 mod components;
+mod resources;
 
 use piston_window::*;
 use specs::prelude::*;
 use std::time::Instant;
+use std::collections::HashMap;
 use components as c;
+use resources as r;
 
 /****** Constants ******/
 
@@ -42,10 +45,11 @@ fn ecs_demo() {
         .with(sys::spawn::BlockSpawner, "spawner", &[]) 
         .with(sys::movement::Movement, "movement", &[])
         .with(sys::ender::Ender, "ender", &[])
+        .with(sys::map::Mapper, "mapper", &[])
         .with_thread_local(sys::piston_wrap::PistonWrapper{ window: window })
         .build();
 
-    while !world.read_resource::<c::KillProgram>().0 { //press esc while playing to end the loop
+    while !world.read_resource::<r::KillProgram>().0 { //press esc while playing to end the loop
         dispatcher.dispatch(&mut world.res);
         world.maintain();
     }
@@ -59,24 +63,25 @@ fn init_world() -> World {
     world.register::<c::DropSpeed>();
     world.register::<c::Active>();
 
-    world.add_resource(c::KeysPressed {
+    world.add_resource(r::KeysPressed {
         left: false,
         right: false,
         space: false,
         escape: false,
     });
-    world.add_resource(c::Actions {
+    world.add_resource(r::Actions {
         move_left: false,
         move_right: false,
         spawn_block: false,
     });
-    world.add_resource(c::Clock {
+    world.add_resource(r::Clock {
         start: Instant::now(),
         last_player_move: Instant::now(),
         last_drop: Instant::now(),
         last_spawn: Instant::now(),
     });
-    world.add_resource(c::KillProgram(false));
+    world.add_resource(r::KillProgram(false));
+    world.add_resource( r::GameMap(HashMap::<u32,f64>::new()) );
 
     world
         .create_entity()

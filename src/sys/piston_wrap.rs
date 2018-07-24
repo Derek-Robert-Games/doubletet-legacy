@@ -2,6 +2,7 @@ use specs::prelude::*;
 use piston_window::*;
 use Button;
 use components as c;
+use resources as r;
 
 pub struct PistonWrapper {
     pub window: PistonWindow,
@@ -12,8 +13,8 @@ impl<'a> System<'a> for PistonWrapper {
         ReadStorage<'a, c::Position>,
         ReadStorage<'a, c::Dimensions>,
         ReadStorage<'a, c::Color>,
-        WriteExpect<'a, c::KeysPressed>,
-        WriteExpect<'a, c::Actions>,
+        WriteExpect<'a, r::KeysPressed>,
+        WriteExpect<'a, r::Actions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
