@@ -1,6 +1,7 @@
 use specs::prelude::*;
 use settings;
 use components as c;
+use resources as r;
 use std::time::Instant;
 
 pub struct BlockSpawner;
@@ -8,9 +9,9 @@ pub struct BlockSpawner;
 impl<'a> System<'a> for BlockSpawner {
     type SystemData = (
         Entities<'a>,
-        WriteExpect<'a, c::Clock>,
+        WriteExpect<'a, r::Clock>,
         Read<'a, LazyUpdate>,
-        WriteExpect<'a, c::Actions>,
+        WriteExpect<'a, r::Actions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
