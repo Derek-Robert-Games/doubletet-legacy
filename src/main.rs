@@ -6,6 +6,7 @@ extern crate specs_derive;
 mod sys;
 mod components;
 mod resources;
+mod menu;
 
 use piston_window::*;
 use specs::prelude::*;
@@ -33,7 +34,7 @@ mod settings {
 /****** Main ******/
 
 fn main() {
-    ecs_demo();
+    menu::menu::show_menu();
 }
 
 fn ecs_demo() {
