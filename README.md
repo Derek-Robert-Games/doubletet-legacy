@@ -1,4 +1,4 @@
-# Tetris with a twist (Double Tetris)
+# DoubleTet
 
 Documentation:
 https://docs.google.com/document/d/1ceafcIbEzfxm2zcUSI8PJG6e4mL3dEidRQMwUaJZHUs/edit
