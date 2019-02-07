@@ -2,7 +2,7 @@
 
 Getting started:
 1. Install rust: https://rustup.rs/
-2. Clone repostiory: `git clone https://github.com/Derek-Robert-Games/doubletet.git`
+2. Clone repostiory.
 2. Execute: `cargo run`
 
 Documentation:
