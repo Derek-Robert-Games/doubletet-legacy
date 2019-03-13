@@ -19,11 +19,13 @@ use resources as r;
 // R: 800 by 640 seems to not quite fit on my laptop screen.
 // Since window resize does not scale the map, blocks will be chopped off at the bottom of my screen.
 mod settings {
-    pub const WINDOW_HEIGHT: u32 = 625;
-    pub const WINDOW_WIDTH: u32 = 500;
+    pub const WINDOW_HEIGHT: u32 = 600;
+    pub const WINDOW_WIDTH: u32 = 300;
     pub const WINDOW_DIMENSIONS: [u32; 2] = [WINDOW_WIDTH, WINDOW_HEIGHT];
-    pub const RECT_WIDTH: f64 = (WINDOW_WIDTH as f64) / 8.0;
-    pub const RECT_HEIGHT: f64 = (WINDOW_HEIGHT as f64) / 10.0;
+    pub const NUMBER_OF_CELLS_WIDE: u16 = 10;
+    pub const NUMBER_OF_CELLS_HIGH: u16 = 20;
+    pub const RECT_WIDTH: f64 = (WINDOW_WIDTH as f64) / (NUMBER_OF_CELLS_WIDE as f64);
+    pub const RECT_HEIGHT: f64 = (WINDOW_HEIGHT as f64) / (NUMBER_OF_CELLS_HIGH as f64);
     pub const NANOS_PER_SECOND: f64 = 1000000000.0;
     pub const MAX_MOVE_SPEED: f64 = 0.05;
     pub const MAX_SPAWN_SPEED: f64 = 0.5;

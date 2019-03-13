@@ -36,7 +36,7 @@ impl<'a> System<'a> for Movement {
                 }
                 if actions.move_left {
                     if secs_since_move > settings::MAX_MOVE_SPEED {
-                        pos.x = pos.x - settings::RECT_HEIGHT;
+                        pos.x = pos.x - settings::RECT_WIDTH;
                         if pos.x < 0.0 {
                             pos.x = window_width - settings::RECT_WIDTH
                         }
