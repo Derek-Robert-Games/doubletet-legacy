@@ -17,7 +17,7 @@ impl<'a> System<'a> for Ender {
         for value in map.0.values() {
             if (*value as u32) == 0 {
                 println!("U luuuuuuu-se");
-                kill.0 = true
+                kill.0 = true;
             }
         }
 

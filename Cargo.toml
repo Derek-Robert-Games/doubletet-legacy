@@ -7,6 +7,7 @@ authors = ["Robert Blankenship <rablanken13@gmail.com>"]
 piston_window = "0.80.0"
 specs = "0.12.0"
 specs-derive = "0.2.0"
+find_folder = "0.3.0"
 
 [[bin]]
 name = "double-tetris"
