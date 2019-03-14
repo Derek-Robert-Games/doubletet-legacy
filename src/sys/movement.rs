@@ -11,7 +11,7 @@ impl<'a> System<'a> for Movement {
         WriteStorage<'a, c::Active>,
         WriteStorage<'a, c::Position>,
         WriteExpect<'a, r::Clock>,
-        WriteExpect<'a, r::Actions>,
+        WriteExpect<'a, r::Actions>
     );
 
     fn run(&mut self, data: Self::SystemData) {

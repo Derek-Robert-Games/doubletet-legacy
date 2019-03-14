@@ -1,5 +1,11 @@
 use specs::prelude::*;
 
+#[derive(Debug)]
+pub struct Offset {
+    pub x: i8,
+    pub y: i8,
+}
+
 /****** Components ******/
 
 #[derive(Component, Debug)]
@@ -7,6 +13,11 @@ pub struct Position {
     pub x: f64,
     pub y: f64,
 }
+
+#[derive(Component, Debug)]
+pub struct BlockOffsets(
+    pub [Offset; 4]
+);
 
 #[derive(Component, Debug)]
 pub struct Dimensions {

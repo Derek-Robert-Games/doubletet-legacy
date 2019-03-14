@@ -11,7 +11,7 @@ impl<'a> System<'a> for BlockSpawner {
         Entities<'a>,
         WriteExpect<'a, r::Clock>,
         Read<'a, LazyUpdate>,
-        WriteExpect<'a, r::Actions>,
+        WriteExpect<'a, r::Actions>
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -23,30 +23,35 @@ impl<'a> System<'a> for BlockSpawner {
 
         if secs_since_spawn > settings::MAX_SPAWN_SPEED {
             if actions.spawn_block {
-                let new_block = entities.create();
-                updater.insert(
-                    new_block,
-                    c::Dimensions {
-                        width: settings::RECT_WIDTH,
-                        height: settings::RECT_HEIGHT,
-                    },
-                );
-                updater.insert(new_block, c::Position { x: 0.0, y: 0.0 });
-                updater.insert(
-                    new_block,
-                    c::Color {
-                        r: 1.0,
-                        g: 0.0,
-                        b: 0.0,
-                        a: 1.0,
-                    },
-                );
-                updater.insert(new_block, c::DropSpeed(settings::STANDARD_DROP_SPEED));
-                updater.insert(new_block, c::Active(true));
-
+                let new_block = spawn(&updater, &entities);
+                make_l_block(&updater, &new_block);
                 clock.last_spawn = Instant::now();
                 actions.spawn_block = false;
             }
         }
     }
+}
+
+fn spawn(updater: &Read<LazyUpdate>, entities: &Entities) -> specs::Entity {
+    let new_block = entities.create();
+    updater.insert(new_block, c::Dimensions {
+        width: settings::RECT_WIDTH,
+        height: settings::RECT_HEIGHT});
+    updater.insert(new_block, c::Position { x: 0.0, y: 0.0 });
+    updater.insert(new_block, c::Color {
+        r: 1.0,
+        g: 0.0,
+        b: 0.0,
+        a: 1.0});
+    updater.insert(new_block, c::DropSpeed(settings::STANDARD_DROP_SPEED));
+    updater.insert(new_block, c::Active(true));
+    new_block
+}
+
+fn make_l_block(updater: &Read<LazyUpdate>, entity: &Entity) {
+    updater.insert(*entity, c::BlockOffsets (
+        [c::Offset {x: 0, y: 0},
+        c::Offset {x: 1, y: 0}, 
+        c::Offset {x: 0, y: -1}, 
+        c::Offset {x: 0, y: -2}]));
 }

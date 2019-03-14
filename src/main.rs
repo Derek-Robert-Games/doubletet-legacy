@@ -64,6 +64,7 @@ fn init_world() -> World {
     world.register::<c::Color>();
     world.register::<c::DropSpeed>();
     world.register::<c::Active>();
+    world.register::<c::BlockOffsets>();
 
     world.add_resource(r::KeysPressed {
         left: false,
@@ -92,6 +93,12 @@ fn init_world() -> World {
             width: settings::RECT_WIDTH,
             height: settings::RECT_HEIGHT,
         })
+        .with(c::BlockOffsets (
+            [c::Offset {x: 0, y: 0},
+            c::Offset {x: 1, y: 0}, 
+            c::Offset {x: 0, y: -1}, 
+            c::Offset {x: 0, y: -2}]
+        ))
         .with(c::Color {
             r: 1.0,
             g: 0.0,
