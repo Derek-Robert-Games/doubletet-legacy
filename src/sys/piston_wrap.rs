@@ -55,7 +55,7 @@ impl<'a> System<'a> for PistonWrapper {
             self.window.draw_2d(&event, |context, graphics| {
                 clear_window(graphics);
                 for (pos, dim, color, offsets) in (&pos, &dim, &color, &offsets).join() {
-                    draw_shape(pos, dim, color, offsets, context, graphics);
+                    draw_shape(pos, dim, color, &offsets.0, context, graphics);
                 } 
             });
         }
@@ -66,16 +66,13 @@ fn clear_window(graphics: &mut piston_window::G2d) {
     clear([1.0; 4], graphics);
 }
 
-fn draw_shape(pos: &c::Position, dim: &c::Dimensions, color: &c::Color, offsets: &c::BlockOffsets, 
+fn draw_shape(pos: &c::Position, dim: &c::Dimensions, color: &c::Color, offsets: &[c::Offset; 4], 
                 context: piston_window::context::Context, graphics: &mut piston_window::G2d) {
-    for offset in offsets.0.iter() {
+    for offset in offsets.iter() {
         let x = pos.x + (offset.x as f64) * settings::RECT_WIDTH;
         let y = pos.y + (offset.y as f64) * settings::RECT_HEIGHT;
         let temp_rect = [x, y, dim.width, dim.height];
         let temp_color = [color.r, color.g, color.b, color.a];
         rectangle(temp_color, temp_rect, context.transform, graphics);
     }
-    let temp_rect = [pos.x, pos.y, dim.width, dim.height];
-    let temp_color = [color.r, color.g, color.b, color.a];
-    rectangle(temp_color, temp_rect, context.transform, graphics);
 }
