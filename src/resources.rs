@@ -28,4 +28,7 @@ pub struct KillProgram(pub bool);
 
 pub struct GameMap(pub HashMap<u32, f64>);
 
-pub struct GameMap2(pub [[i8; settings::NUMBER_OF_CELLS_HIGH]; settings::NUMBER_OF_CELLS_WIDE]);
+pub struct GameMap2(
+    pub  [[i8; (settings::NUMBER_OF_CELLS_HIGH as usize)];
+        (settings::NUMBER_OF_CELLS_WIDE as usize)],
+);

@@ -40,16 +40,18 @@ fn main() {
 
 fn ecs_demo() {
     let window = init_window();
-    let mut world = init_world();
+    let mut world = World::new();
 
-    let mut dispatcher = DispatcherBuilder::new()
-        .with(sys::drop::Dropper, "dropper", &[])
-        .with(sys::spawn::BlockSpawner, "spawner", &[])
-        .with(sys::movement::Movement, "movement", &[])
-        .with(sys::ender::Ender, "ender", &[])
-        .with(sys::map::Mapper, "mapper", &[])
-        .with_thread_local(sys::piston_wrap::PistonWrapper { window: window })
-        .build();
+    let mut dispatcher = init_dispatcher(window);
+
+    dispatcher.setup(&mut world.res);
+
+    init_keys(&mut world);
+    init_actions(&mut world);
+    init_clock(&mut world);
+    init_kill_program(&mut world);
+    init_game_map(&mut world);
+    spawn_initial_block(&mut world);
 
     while !world.read_resource::<r::KillProgram>().0 {
         //press esc while playing to end the loop
@@ -58,35 +60,52 @@ fn ecs_demo() {
     }
 }
 
-fn init_world() -> World {
-    let mut world = World::new();
-    world.register::<c::Position>();
-    world.register::<c::Dimensions>();
-    world.register::<c::Color>();
-    world.register::<c::DropSpeed>();
-    world.register::<c::Active>();
-    world.register::<c::BlockOffsets>();
+fn init_dispatcher<'a, 'b>(window: PistonWindow) -> Dispatcher<'a, 'b> {
+    DispatcherBuilder::new()
+        .with(sys::drop::Dropper, "dropper", &[])
+        .with(sys::spawn::BlockSpawner, "spawner", &[])
+        .with(sys::movement::Movement, "movement", &[])
+        .with(sys::ender::Ender, "ender", &[])
+        .with(sys::map::Mapper, "mapper", &[])
+        .with_thread_local(sys::piston_wrap::PistonWrapper { window: window })
+        .build()
+}
 
+fn init_keys(world: &mut World) {
     world.add_resource(r::KeysPressed {
         left: false,
         right: false,
         space: false,
         escape: false,
     });
+}
+
+fn init_actions(world: &mut World) {
     world.add_resource(r::Actions {
         move_left: false,
         move_right: false,
         spawn_block: false,
     });
+}
+
+fn init_clock(world: &mut World) {
     world.add_resource(r::Clock {
         start: Instant::now(),
         last_player_move: Instant::now(),
         last_drop: Instant::now(),
         last_spawn: Instant::now(),
     });
-    world.add_resource(r::KillProgram(false));
-    world.add_resource(r::GameMap(HashMap::<u32, f64>::new()));
+}
 
+fn init_kill_program(world: &mut World) {
+    world.add_resource(r::KillProgram(false));
+}
+
+fn init_game_map(world: &mut World) {
+    world.add_resource(r::GameMap(HashMap::<u32, f64>::new()));
+}
+
+fn spawn_initial_block(world: &mut World) {
     world
         .create_entity()
         .with(c::Position { x: 0.0, y: 0.0 })
@@ -109,8 +128,6 @@ fn init_world() -> World {
         .with(c::DropSpeed(settings::STANDARD_DROP_SPEED))
         .with(c::Active(true))
         .build();
-
-    world
 }
 
 fn init_window() -> PistonWindow {
