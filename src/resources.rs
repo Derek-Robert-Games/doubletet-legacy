@@ -1,5 +1,6 @@
-use std::time::Instant;
+use settings;
 use std::collections::HashMap;
+use std::time::Instant;
 
 /****** Resources ******/
 
@@ -25,4 +26,6 @@ pub struct Actions {
 
 pub struct KillProgram(pub bool);
 
-pub struct GameMap (pub HashMap<u32, f64>);
+pub struct GameMap(pub HashMap<u32, f64>);
+
+pub struct GameMap2(pub [[i8; settings::NUMBER_OF_CELLS_HIGH]; settings::NUMBER_OF_CELLS_WIDE]);

@@ -1,8 +1,8 @@
-use specs::prelude::*;
-use settings;
-use std::time::Instant;
 use components as c;
 use resources as r;
+use settings;
+use specs::prelude::*;
+use std::time::Instant;
 
 pub struct Movement;
 
@@ -11,7 +11,7 @@ impl<'a> System<'a> for Movement {
         WriteStorage<'a, c::Active>,
         WriteStorage<'a, c::Position>,
         WriteExpect<'a, r::Clock>,
-        WriteExpect<'a, r::Actions>
+        WriteExpect<'a, r::Actions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {

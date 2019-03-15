@@ -3,16 +3,16 @@ extern crate specs;
 #[macro_use]
 extern crate specs_derive;
 
-mod sys;
 mod components;
 mod resources;
+mod sys;
 
-use piston_window::*;
-use specs::prelude::*;
-use std::time::Instant;
-use std::collections::HashMap;
 use components as c;
+use piston_window::*;
 use resources as r;
+use specs::prelude::*;
+use std::collections::HashMap;
+use std::time::Instant;
 
 /****** Constants ******/
 
@@ -44,14 +44,15 @@ fn ecs_demo() {
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(sys::drop::Dropper, "dropper", &[])
-        .with(sys::spawn::BlockSpawner, "spawner", &[]) 
+        .with(sys::spawn::BlockSpawner, "spawner", &[])
         .with(sys::movement::Movement, "movement", &[])
         .with(sys::ender::Ender, "ender", &[])
         .with(sys::map::Mapper, "mapper", &[])
-        .with_thread_local(sys::piston_wrap::PistonWrapper{ window: window })
+        .with_thread_local(sys::piston_wrap::PistonWrapper { window: window })
         .build();
 
-    while !world.read_resource::<r::KillProgram>().0 { //press esc while playing to end the loop
+    while !world.read_resource::<r::KillProgram>().0 {
+        //press esc while playing to end the loop
         dispatcher.dispatch(&mut world.res);
         world.maintain();
     }
@@ -84,7 +85,7 @@ fn init_world() -> World {
         last_spawn: Instant::now(),
     });
     world.add_resource(r::KillProgram(false));
-    world.add_resource( r::GameMap(HashMap::<u32,f64>::new()) );
+    world.add_resource(r::GameMap(HashMap::<u32, f64>::new()));
 
     world
         .create_entity()
@@ -93,12 +94,12 @@ fn init_world() -> World {
             width: settings::RECT_WIDTH,
             height: settings::RECT_HEIGHT,
         })
-        .with(c::BlockOffsets (
-            [c::Offset {x: 0, y: 0},
-            c::Offset {x: 1, y: 0}, 
-            c::Offset {x: 0, y: -1}, 
-            c::Offset {x: 0, y: -2}]
-        ))
+        .with(c::BlockOffsets([
+            c::Offset { x: 0, y: 0 },
+            c::Offset { x: 1, y: 0 },
+            c::Offset { x: 0, y: -1 },
+            c::Offset { x: 0, y: -2 },
+        ]))
         .with(c::Color {
             r: 1.0,
             g: 0.0,

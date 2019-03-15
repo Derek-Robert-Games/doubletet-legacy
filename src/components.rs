@@ -15,9 +15,7 @@ pub struct Position {
 }
 
 #[derive(Component, Debug)]
-pub struct BlockOffsets(
-    pub [Offset; 4]
-);
+pub struct BlockOffsets(pub [Offset; 4]);
 
 #[derive(Component, Debug)]
 pub struct Dimensions {
@@ -35,7 +33,6 @@ pub struct Color {
 
 #[derive(Component, Debug)]
 pub struct DropSpeed(pub f64);
-
 
 #[derive(Component, Debug)]
 pub struct Active(pub bool);

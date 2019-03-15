@@ -1,17 +1,17 @@
-use specs::prelude::*;
-use std::collections::HashMap;
 use components as c;
 use resources as r;
 use settings;
+use specs::prelude::*;
+use std::collections::HashMap;
 
-pub struct Mapper; 
+pub struct Mapper;
 
 impl<'a> System<'a> for Mapper {
     type SystemData = (
         WriteStorage<'a, c::Position>,
         ReadStorage<'a, c::BlockOffsets>,
         WriteExpect<'a, r::GameMap>,
-        ReadStorage<'a, c::Active>
+        ReadStorage<'a, c::Active>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -20,7 +20,7 @@ impl<'a> System<'a> for Mapper {
         // for all active blocks, update the map with their y value
         for (active, pos, offsets) in (&actives, &positions, &offsets).join() {
             update_map(active.0, pos.x as u32, pos.y, &mut map.0, &offsets.0);
-        }   
+        }
     }
 }
 

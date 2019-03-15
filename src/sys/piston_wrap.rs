@@ -1,9 +1,9 @@
-use specs::prelude::*;
-use piston_window::*;
-use Button;
 use components as c;
+use piston_window::*;
 use resources as r;
 use settings;
+use specs::prelude::*;
+use Button;
 
 pub struct PistonWrapper {
     pub window: PistonWindow,
@@ -16,7 +16,7 @@ impl<'a> System<'a> for PistonWrapper {
         ReadStorage<'a, c::BlockOffsets>,
         ReadStorage<'a, c::Color>,
         WriteExpect<'a, r::KeysPressed>,
-        WriteExpect<'a, r::Actions>
+        WriteExpect<'a, r::Actions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -56,7 +56,7 @@ impl<'a> System<'a> for PistonWrapper {
                 clear_window(graphics);
                 for (pos, dim, color, offsets) in (&pos, &dim, &color, &offsets).join() {
                     draw_shape(pos, dim, color, &offsets.0, context, graphics);
-                } 
+                }
             });
         }
     }
@@ -66,8 +66,14 @@ fn clear_window(graphics: &mut piston_window::G2d) {
     clear([1.0; 4], graphics);
 }
 
-fn draw_shape(pos: &c::Position, dim: &c::Dimensions, color: &c::Color, offsets: &[c::Offset; 4], 
-                context: piston_window::context::Context, graphics: &mut piston_window::G2d) {
+fn draw_shape(
+    pos: &c::Position,
+    dim: &c::Dimensions,
+    color: &c::Color,
+    offsets: &[c::Offset; 4],
+    context: piston_window::context::Context,
+    graphics: &mut piston_window::G2d,
+) {
     for offset in offsets.iter() {
         let x = pos.x + (offset.x as f64) * settings::RECT_WIDTH;
         let y = pos.y + (offset.y as f64) * settings::RECT_HEIGHT;
