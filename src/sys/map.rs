@@ -3,6 +3,7 @@ use resources as r;
 use settings;
 use specs::prelude::*;
 use std::collections::HashMap;
+use utils::Offset;
 
 pub struct Mapper;
 
@@ -24,7 +25,7 @@ impl<'a> System<'a> for Mapper {
     }
 }
 
-fn update_map(active: bool, x: u32, y: f64, map: &mut HashMap<u32, f64>, offsets: &[c::Offset; 4]) {
+fn update_map(active: bool, x: u32, y: f64, map: &mut HashMap<u32, f64>, offsets: &[Offset; 4]) {
     if !active {
         for offset in offsets {
             let x_offset = (offset.x as f64) * settings::RECT_WIDTH;

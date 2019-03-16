@@ -3,6 +3,7 @@ use piston_window::*;
 use resources as r;
 use settings;
 use specs::prelude::*;
+use utils::Offset;
 use Button;
 
 pub struct PistonWrapper {
@@ -70,15 +71,25 @@ fn draw_shape(
     pos: &c::Position,
     dim: &c::Dimensions,
     color: &c::Color,
-    offsets: &[c::Offset; 4],
+    offsets: &[Offset; 4],
     context: piston_window::context::Context,
     graphics: &mut piston_window::G2d,
 ) {
     for offset in offsets.iter() {
-        let x = pos.x + (offset.x as f64) * settings::RECT_WIDTH;
-        let y = pos.y + (offset.y as f64) * settings::RECT_HEIGHT;
-        let temp_rect = [x, y, dim.width, dim.height];
-        let temp_color = [color.r, color.g, color.b, color.a];
-        rectangle(temp_color, temp_rect, context.transform, graphics);
+        let off_pos = pos.get_offset_position(offset);
+        rectangle(
+            build_color(&color),
+            build_rect(&off_pos, &dim),
+            context.transform,
+            graphics,
+        );
     }
+}
+
+fn build_rect(pos: &c::Position, dim: &c::Dimensions) -> [f64; 4] {
+    [pos.x, pos.y, dim.width, dim.height]
+}
+
+fn build_color(color: &c::Color) -> [f32; 4] {
+    [color.r, color.g, color.b, color.a]
 }

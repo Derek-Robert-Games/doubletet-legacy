@@ -3,6 +3,7 @@ use resources as r;
 use settings;
 use specs::prelude::*;
 use std::time::Instant;
+use utils::Offset;
 
 pub struct BlockSpawner;
 
@@ -60,10 +61,10 @@ fn make_l_block(updater: &Read<LazyUpdate>, entity: &Entity) {
     updater.insert(
         *entity,
         c::BlockOffsets([
-            c::Offset { x: 0, y: 0 },
-            c::Offset { x: 1, y: 0 },
-            c::Offset { x: 0, y: -1 },
-            c::Offset { x: 0, y: -2 },
+            Offset { x: 0, y: 0 },
+            Offset { x: 1, y: 0 },
+            Offset { x: 0, y: -1 },
+            Offset { x: 0, y: -2 },
         ]),
     );
 }

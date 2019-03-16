@@ -6,6 +6,7 @@ extern crate specs_derive;
 mod components;
 mod resources;
 mod sys;
+mod utils;
 
 use components as c;
 use piston_window::*;
@@ -13,6 +14,7 @@ use resources as r;
 use specs::prelude::*;
 use std::collections::HashMap;
 use std::time::Instant;
+use utils::Offset;
 
 /****** Constants ******/
 
@@ -103,6 +105,9 @@ fn init_kill_program(world: &mut World) {
 
 fn init_game_map(world: &mut World) {
     world.add_resource(r::GameMap(HashMap::<u32, f64>::new()));
+    world.add_resource(r::GameMap2(
+        [[0; (settings::NUMBER_OF_CELLS_HIGH as usize)]; (settings::NUMBER_OF_CELLS_WIDE as usize)],
+    ))
 }
 
 fn spawn_initial_block(world: &mut World) {
@@ -114,10 +119,10 @@ fn spawn_initial_block(world: &mut World) {
             height: settings::RECT_HEIGHT,
         })
         .with(c::BlockOffsets([
-            c::Offset { x: 0, y: 0 },
-            c::Offset { x: 1, y: 0 },
-            c::Offset { x: 0, y: -1 },
-            c::Offset { x: 0, y: -2 },
+            Offset { x: 0, y: 0 },
+            Offset { x: 1, y: 0 },
+            Offset { x: 0, y: -1 },
+            Offset { x: 0, y: -2 },
         ]))
         .with(c::Color {
             r: 1.0,
