@@ -1,7 +1,6 @@
 use components as c;
 use piston_window::*;
 use resources as r;
-use settings;
 use specs::prelude::*;
 use utils::Offset;
 use Button;

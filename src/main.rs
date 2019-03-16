@@ -12,7 +12,6 @@ use components as c;
 use piston_window::*;
 use resources as r;
 use specs::prelude::*;
-use std::collections::HashMap;
 use std::time::Instant;
 use utils::Offset;
 
@@ -104,10 +103,10 @@ fn init_kill_program(world: &mut World) {
 }
 
 fn init_game_map(world: &mut World) {
-    world.add_resource(r::GameMap(HashMap::<u32, f64>::new()));
-    world.add_resource(r::GameMap2(
-        [[0; (settings::NUMBER_OF_CELLS_HIGH as usize)]; (settings::NUMBER_OF_CELLS_WIDE as usize)],
-    ))
+    world.add_resource(r::GameMap {
+        map: [[false; (settings::NUMBER_OF_CELLS_HIGH as usize)];
+            (settings::NUMBER_OF_CELLS_WIDE as usize)],
+    })
 }
 
 fn spawn_initial_block(world: &mut World) {

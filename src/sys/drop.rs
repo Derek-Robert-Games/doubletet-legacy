@@ -3,6 +3,7 @@ use resources as r;
 use settings;
 use specs::prelude::*;
 use std::time::Instant;
+use utils;
 
 pub struct Dropper;
 
@@ -32,19 +33,21 @@ impl<'a> System<'a> for Dropper {
                 pos.y = (pos.y + y_delta) % (settings::WINDOW_HEIGHT as f64);
 
                 for offset in offsets.0.iter() {
-                    let x = pos.x + (offset.x as f64) * settings::RECT_WIDTH;
-                    let y = pos.y + (offset.y as f64) * settings::RECT_HEIGHT;
-                    let y_max = match map.0.get(&(x as u32)) {
-                        Some(&pos_y) => pos_y,
-                        None => (settings::WINDOW_HEIGHT as f64) - (settings::RECT_HEIGHT),
+                    let coords = pos.get_offset_coords(offset);
+                    let coords_below = utils::Coordinates {
+                        x: coords.x,
+                        y: coords.y + 1,
                     };
-                    if y >= y_max {
-                        pos.y = y_max;
+                    if coords.y >= (settings::NUMBER_OF_CELLS_HIGH as i16) - 1 {
+                        pos.y = (settings::WINDOW_HEIGHT as f64) - settings::RECT_WIDTH;
+                        active.0 = false;
+                        actions.spawn_block = true;
+                    } else if map.get(&coords_below) {
+                        pos.y = coords.get_position().y;
                         active.0 = false;
                         actions.spawn_block = true;
                     }
                 }
-
                 clock.last_drop = Instant::now();
             }
         }

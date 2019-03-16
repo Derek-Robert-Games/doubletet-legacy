@@ -15,12 +15,5 @@ impl<'a> System<'a> for Ender {
         if keys.escape {
             kill.0 = true;
         }
-
-        for value in map.0.values() {
-            if (*value as u32) == 0 {
-                println!("U luuuuuuu-se");
-                kill.0 = true
-            }
-        }
     }
 }
