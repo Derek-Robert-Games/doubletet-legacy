@@ -1,8 +1,9 @@
-use specs::prelude::*;
-use piston_window::*;
-use Button;
 use components as c;
+use piston_window::*;
 use resources as r;
+use specs::prelude::*;
+use utils::Offset;
+use Button;
 
 pub struct PistonWrapper {
     pub window: PistonWindow,
@@ -12,13 +13,14 @@ impl<'a> System<'a> for PistonWrapper {
     type SystemData = (
         ReadStorage<'a, c::Position>,
         ReadStorage<'a, c::Dimensions>,
+        ReadStorage<'a, c::BlockOffsets>,
         ReadStorage<'a, c::Color>,
         WriteExpect<'a, r::KeysPressed>,
         WriteExpect<'a, r::Actions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (pos, dim, color, mut keys, mut actions) = data;
+        let (pos, dim, offsets, color, mut keys, mut actions) = data;
 
         if let Some(event) = self.window.next() {
             // saving user Movement for process by other systems
@@ -50,17 +52,43 @@ impl<'a> System<'a> for PistonWrapper {
                 _ => {}
             }
 
-            // updating graphics
             self.window.draw_2d(&event, |context, graphics| {
-                clear([1.0; 4], graphics);
-
-                //for all entities with pos, dim, and color properties (i.e. rect)
-                for (pos, dim, color) in (&pos, &dim, &color).join() {
-                    let temp_rect = [pos.x, pos.y, dim.width, dim.height];
-                    let temp_color = [color.r, color.g, color.b, color.a];
-                    rectangle(temp_color, temp_rect, context.transform, graphics);
+                clear_window(graphics);
+                for (pos, dim, color, offsets) in (&pos, &dim, &color, &offsets).join() {
+                    draw_shape(pos, dim, color, &offsets.0, context, graphics);
                 }
             });
         }
     }
+}
+
+fn clear_window(graphics: &mut piston_window::G2d) {
+    clear([1.0; 4], graphics);
+}
+
+fn draw_shape(
+    pos: &c::Position,
+    dim: &c::Dimensions,
+    color: &c::Color,
+    offsets: &[Offset; 4],
+    context: piston_window::context::Context,
+    graphics: &mut piston_window::G2d,
+) {
+    for offset in offsets.iter() {
+        let off_pos = pos.get_offset_position(offset);
+        rectangle(
+            build_color(&color),
+            build_rect(&off_pos, &dim),
+            context.transform,
+            graphics,
+        );
+    }
+}
+
+fn build_rect(pos: &c::Position, dim: &c::Dimensions) -> [f64; 4] {
+    [pos.x, pos.y, dim.width, dim.height]
+}
+
+fn build_color(color: &c::Color) -> [f32; 4] {
+    [color.r, color.g, color.b, color.a]
 }
